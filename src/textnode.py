@@ -1,4 +1,5 @@
 from htmlnode import LeafNode
+import re
 # TextNode == a class that can take three arguments in its constructor: text, text_type and url
 class TextNode():
     def __init__(self, text, text_type, url=None):
@@ -67,3 +68,13 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
    return new_nodes
 
+def extract_markdown_images(text):
+    # take text with embedded links for images and split them
+    regex = r"!\[(.*?)\]\((.*?)\)"
+    matches = re.findall(regex, text)
+    return matches
+
+def extract_markdown_links(text):
+    # extract links from markdown text
+    regex = r"\[(.*?)\]\((.*?)\)"
+    return re.findall(regex, text)
