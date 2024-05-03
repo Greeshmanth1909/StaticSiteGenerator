@@ -1,4 +1,5 @@
 import re
+from htmlnode import HTMLNode
 # Takes raw markdown and converts it into a list of clock strings
 
 block_type_paragraph = "paragraph"
@@ -47,3 +48,40 @@ def split_line_helper(split_line_list, regex):
         if not re.match(regex, line):
             return False
     return True
+
+
+# convert block to its corresponding html node
+def paragraph_to_html_node(block):
+    return HTMLNode("p", block)
+
+def code_to_html_node(block):
+    code = HTMLNode("code", block)
+    return HTMLNode("pre", None, code)
+
+def quote_to_html_node(block):
+    return HTMLNode("blockquote", block)
+
+def ul_to_html_node(block):
+    ul_elements = block.split("\n")
+    ul_nodes = map(lambda x: HTMLNode("li", x), ul_elements)
+    return HTMLNode("ul", None, ul_nodes)
+
+def ol_to_html_node(block):
+    ol_nodes = map(lambda x: HTMLNode("li", x), block.split("\n"))
+    return HTMLNode("ol", None, ol_nodes)
+
+def headings_to_html_node(block):
+    # Isolate the number of # with regex
+    regex = r'^#{1,6}'
+    hash_count = len(re.findall(regex, block)[0])
+    return HTMLNode(f"h{hash_count}", block)
+
+def markdown_to_html_node(markdown):
+    # The md is raw
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        block_type =  block_to_block_type(block)
+        if block_type == block_type_paragraph:
+            # might use text_to_text_nodes function
+            pass
+    
