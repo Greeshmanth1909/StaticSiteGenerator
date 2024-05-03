@@ -7,7 +7,10 @@ class HTMLNode():
         self.props = props
 
     def to_html(self):
-        raise NotImplemented("not implemented yet!")
+        if self.children:
+            # iterate through list
+            pass
+        return f"<{self.tag} {self.props_to_html()}>{self.value}</{self.tag}>"
 
     def props_to_html(self):
         return " ".join(map(lambda prop: f"{prop}=\"{self.props[prop]}\"", self.props.keys()))

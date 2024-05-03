@@ -1,5 +1,6 @@
 import re
 from htmlnode import HTMLNode
+from textnode import text_to_textnodes, text_node_to_html_node
 # Takes raw markdown and converts it into a list of clock strings
 
 block_type_paragraph = "paragraph"
@@ -79,9 +80,41 @@ def headings_to_html_node(block):
 def markdown_to_html_node(markdown):
     # The md is raw
     blocks = markdown_to_blocks(markdown)
+    # define global html for blocks
+    html_nodes = []
     for block in blocks:
         block_type =  block_to_block_type(block)
         if block_type == block_type_paragraph:
             # might use text_to_text_nodes function
-            pass
-    
+            text_nodes = text_to_textnodes(block)
+            leaf_nodes = []
+            for node in text_nodes:
+                leaf_nodes.append(text_node_to_html_node(node))
+            # have to convert leaf nodes to html nodes
+            leaf_nodes_combo = map(lambda x: x.to_html(), leaf_nodes)
+            para_value = "".join(leaf_nodes_combo)
+            html_nodes.append(HTMLNode("p", para_value))
+
+        # Code
+        if block_type == block_type_code:
+            html_nodes.append(code_to_html_node(block))
+
+        # heading
+        if block_type == block_type_heading:
+            html_nodes.append(headings_to_html_node(block))
+
+        # ol
+        if block_type == block_type_ol:
+            html_nodes.append(ol_to_html_node(block))
+
+        # ul
+        if block_type == block_type_ul:
+            html_nodes.append(ul_to_html_node(block))
+
+        # quote
+        if block_type == block_type_quote:
+            html_nodes.append(quote_to_html_node(block))
+
+    # Once the html nodes list is populated, convert it to a string
+    raw_html = "".join(html_nodes)
+    return HTMLNode("div", raw_html)
