@@ -1,6 +1,6 @@
 import re
 from htmlnode import HTMLNode
-from textnode import text_to_textnodes, text_node_to_html_node
+from textnode import text_to_textnodes, text_node_to_html_node, ParentNode
 # Takes raw markdown and converts it into a list of clock strings
 
 block_type_paragraph = "paragraph"
@@ -69,13 +69,13 @@ def ul_to_html_node(block):
 
 def ol_to_html_node(block):
     ol_nodes = map(lambda x: HTMLNode("li", x), block.split("\n"))
-    return HTMLNode("ol", None, ol_nodes)
+    return ParentNode("ol", None, ol_nodes)
 
 def headings_to_html_node(block):
     # Isolate the number of # with regex
     regex = r'^#{1,6}'
     hash_count = len(re.findall(regex, block)[0])
-    return HTMLNode(f"h{hash_count}", block)
+    return ParentNode(f"h{hash_count}", None, block)
 
 def markdown_to_html_node(markdown):
     # The md is raw
@@ -115,6 +115,6 @@ def markdown_to_html_node(markdown):
         if block_type == block_type_quote:
             html_nodes.append(quote_to_html_node(block))
 
-    # Once the html nodes list is populated, convert it to a string
-    raw_html = "".join(html_nodes)
-    return HTMLNode("div", raw_html)
+    # The html node list contains the children of all
+    mega_parent = ParentNode("div", None, html_nodes)
+    return mega_parent
