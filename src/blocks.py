@@ -118,3 +118,29 @@ def markdown_to_html_node(markdown):
     # The html node list contains the children of all
     mega_parent = ParentNode("div", None, html_nodes)
     return mega_parent
+
+
+def extract_title(markdown):
+    regex = r'^# .*$'
+    title = re.findall(regex, markdown)
+    if len(title) == 0:
+        raise Exception("Page doesn't have a heading")
+    return title[0]
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    f = open(from_path)
+    from_path_md = f.read()
+    f.close()
+
+    # read template
+    f = open(template_path)
+    template_file = f.read()
+    f.close()
+
+    title = extract_title(from_path_md)
+    content = markdown_to_html_node(from_path_md).to_html()
+
+    template_file.replace("{{ Title }}", title)
+    template_file.replace("{{ Content }}", content)
+
