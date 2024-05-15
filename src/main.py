@@ -1,6 +1,6 @@
 import shutil
 import os
-from textnode import TextNode
+from blocks import generate_page
 
 # copy contents from source to destination
 def copy_contents(source, destination):
@@ -45,9 +45,7 @@ def recursive_helper(src, des):
 
 
 def main():
-    # create a dummy TextNode
-    mynode = TextNode("this is a text", "bold", "https://www.boot.dev")
-    print(mynode)
     copy_contents("static", "public")
+    generate_page("content/index.md", "template.html", "public/index.html")
 
 main()

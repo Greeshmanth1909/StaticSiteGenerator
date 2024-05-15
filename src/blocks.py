@@ -1,6 +1,7 @@
-import re
+import re, os
 from htmlnode import HTMLNode
-from textnode import text_to_textnodes, text_node_to_html_node, ParentNode
+from textnode import text_to_textnodes, text_node_to_html_node
+from htmlnode import ParentNode
 # Takes raw markdown and converts it into a list of clock strings
 
 block_type_paragraph = "paragraph"
@@ -60,7 +61,13 @@ def code_to_html_node(block):
     return HTMLNode("pre", None, code)
 
 def quote_to_html_node(block):
-    return HTMLNode("blockquote", block)
+    quote_list = block.split("> ")
+    html_node_list = []
+    for quote in quote_list:
+        if quote == "":
+            continue
+        html_node_list.append(HTMLNode("blockquote", quote))
+    return html_node_list
 
 def ul_to_html_node(block):
     ul_elements = block.split("\n")
@@ -68,14 +75,14 @@ def ul_to_html_node(block):
     return HTMLNode("ul", None, ul_nodes)
 
 def ol_to_html_node(block):
-    ol_nodes = map(lambda x: HTMLNode("li", x), block.split("\n"))
-    return ParentNode("ol", None, ol_nodes)
+    ol_nodes = map(lambda x: HTMLNode("li", re.sub(r'^\d+\. ', "", x)), block.split("\n"))
+    return ParentNode("ol", ol_nodes)
 
 def headings_to_html_node(block):
     # Isolate the number of # with regex
     regex = r'^#{1,6}'
     hash_count = len(re.findall(regex, block)[0])
-    return ParentNode(f"h{hash_count}", None, block)
+    return HTMLNode(f"h{hash_count}", block.strip(f"{re.findall(regex, block)[0]}"))
 
 def markdown_to_html_node(markdown):
     # The md is raw
@@ -113,19 +120,23 @@ def markdown_to_html_node(markdown):
 
         # quote
         if block_type == block_type_quote:
-            html_nodes.append(quote_to_html_node(block))
+            quote_list = quote_to_html_node(block)
+            for quote in quote_list:
+                print(quote)
+                html_nodes.append(quote)
 
     # The html node list contains the children of all
-    mega_parent = ParentNode("div", None, html_nodes)
+    mega_parent = ParentNode("div", html_nodes)
     return mega_parent
 
 
 def extract_title(markdown):
-    regex = r'^# .*$'
-    title = re.findall(regex, markdown)
-    if len(title) == 0:
-        raise Exception("Page doesn't have a heading")
-    return title[0]
+    for line in markdown.split("\n"):
+        if line.startswith("#"):
+            return line.strip("#")
+
+    raise Exception("Document must contain a heading")
+
 
 def generate_page(from_path, template_path, dest_path):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
@@ -138,9 +149,19 @@ def generate_page(from_path, template_path, dest_path):
     template_file = f.read()
     f.close()
 
-    title = extract_title(from_path_md)
+    title = extract_title(from_path_md).strip("#")
     content = markdown_to_html_node(from_path_md).to_html()
-
-    template_file.replace("{{ Title }}", title)
-    template_file.replace("{{ Content }}", content)
+    html = template_file.replace(" {{ Title }} ", title)
+    html = html.replace("{{ Content }}", content)
+    
+    # Write template_file to html in specified path
+    #if not os.path.exists(dest_path):
+     #   os.makedirs(dest_path)
+    
+    try:
+        f = open(dest_path, "w")
+        f.write(html)
+        f.close()
+    except Exception as e:
+        print(f"error: {e}")
 

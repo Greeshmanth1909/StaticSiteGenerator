@@ -7,13 +7,11 @@ class HTMLNode():
         self.props = props
 
     def to_html(self):
-        if self.children:
-            # iterate through list
-            pass
-        return f"<{self.tag} {self.props_to_html()}>{self.value}</{self.tag}>"
+        return f"<{self.tag}>{self.value}</{self.tag}>" 
 
     def props_to_html(self):
-        return " ".join(map(lambda prop: f"{prop}=\"{self.props[prop]}\"", self.props.keys()))
+        if self.props is not None:
+            return " ".join(map(lambda prop: f"{prop}=\"{self.props[prop]}\"", self.props.keys()))
 
     def __repr__(self):
         return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
@@ -51,7 +49,7 @@ class ParentNode(HTMLNode):
                 # add child to string list
                 html_str.append(child.to_html())
             else:
-                # the node might be a parent node, racursion
+                # the node might be a parent node, recursion
                 html_str.append(child.to_html())
 
         # the html string should be populated as expected, hopefully
