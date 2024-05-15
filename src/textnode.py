@@ -52,7 +52,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
    for node in old_nodes:
         text = node.text
         split_text = text.split(delimiter)
-        text_btw_delimiter = []
         index_of_first_delimiter = text.find(delimiter)
         index_of_second_delimiter = text.find(delimiter, index_of_first_delimiter + 1, len(text))
         # if index of second delimiter is -1, only one occurance is present

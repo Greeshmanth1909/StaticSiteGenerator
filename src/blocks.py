@@ -57,8 +57,8 @@ def paragraph_to_html_node(block):
     return HTMLNode("p", block)
 
 def code_to_html_node(block):
-    code = HTMLNode("code", block)
-    return HTMLNode("pre", None, code)
+    code = [HTMLNode("code", block)]
+    return ParentNode("pre", code)
 
 def quote_to_html_node(block):
     quote_list = block.split("> ")
@@ -71,8 +71,9 @@ def quote_to_html_node(block):
 
 def ul_to_html_node(block):
     ul_elements = block.split("\n")
-    ul_nodes = map(lambda x: HTMLNode("li", x), ul_elements)
-    return HTMLNode("ul", None, ul_nodes)
+    regex = r'^- '
+    ul_nodes = map(lambda x: HTMLNode("li", re.sub(regex, "", x)), ul_elements)
+    return ParentNode("ul", ul_nodes)
 
 def ol_to_html_node(block):
     ol_nodes = map(lambda x: HTMLNode("li", re.sub(r'^\d+\. ', "", x)), block.split("\n"))
@@ -122,7 +123,6 @@ def markdown_to_html_node(markdown):
         if block_type == block_type_quote:
             quote_list = quote_to_html_node(block)
             for quote in quote_list:
-                print(quote)
                 html_nodes.append(quote)
 
     # The html node list contains the children of all
