@@ -2,6 +2,7 @@ import re, os
 from htmlnode import HTMLNode
 from textnode import text_to_textnodes, text_node_to_html_node
 from htmlnode import ParentNode
+from pathlib import Path
 # Takes raw markdown and converts it into a list of clock strings
 
 block_type_paragraph = "paragraph"
@@ -159,9 +160,30 @@ def generate_page(from_path, template_path, dest_path):
      #   os.makedirs(dest_path)
     
     try:
+        dest_path = os.path.join(dest_path, "index.html")
         f = open(dest_path, "w")
         f.write(html)
         f.close()
     except Exception as e:
         print(f"error: {e}")
 
+
+def generate_page_recursive(from_path, template_path, dest_path):
+    # Crawl every entry in the from path and generate a .html file for every .md file
+    # List contents of current directory
+    contents = os.listdir(from_path)
+
+    # Iterate through contents
+    for item in contents:
+        item_path = os.path.join(from_path, item)
+        print(item_path)
+        
+        if os.path.isfile(item_path):
+            # Copy the contents of this file into destination path
+             # Ensure the required directory exists
+             generate_page(item_path, template_path, dest_path)
+        else:
+            if item not in os.listdir(dest_path):
+                dest_path = os.path.join(dest_path, item)
+                os.mkdir(dest_path)
+            generate_page_recursive(item_path, template_path, dest_path)

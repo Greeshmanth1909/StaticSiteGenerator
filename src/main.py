@@ -1,6 +1,6 @@
 import shutil
 import os
-from blocks import generate_page
+from blocks import generate_page_recursive
 
 # copy contents from source to destination
 def copy_contents(source, destination):
@@ -46,6 +46,6 @@ def recursive_helper(src, des):
 
 def main():
     copy_contents("static", "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_page_recursive("content", "template.html", "public")
 
 main()
